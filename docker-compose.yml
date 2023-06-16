@@ -1,0 +1,63 @@
+version: "3.9"
+volumes:
+  db-store:
+  psysh-store:
+services:
+  web:
+    build:
+      context: .
+      dockerfile: ./.docker/php/Dockerfile
+      target: ${APP_BUILD_TARGET:-development}
+    ports:
+      - "5173:5173"
+    volumes:
+      - type: bind
+        source: ./contents
+        target: /home/contents
+      - type: volume
+        source: psysh-store
+        target: /root/.config/psysh
+        volume:
+          nocopy: true
+
+  gateway:
+    build:
+      context: .
+      dockerfile: ./.docker/nginx/Dockerfile
+    ports:
+      - target: 80
+        published: ${WEB_PUBLISHED_PORT:-80}
+        protocol: tcp
+        mode: host
+    volumes:
+      - type: bind
+        source: ./contents
+        target: /home/contents
+
+  db:
+    image: mysql:8.0
+    ports:
+      - target: 3306
+        published: ${DB_PUBLISHED_PORT:-3306}
+        protocol: tcp
+        mode: host
+    volumes:
+      - ./.docker/mysql/setup.sql:/docker-entrypoint-initdb.d/setup.sql
+      - type: volume
+        source: db-store
+        target: /var/lib/mysql
+        volume:
+          nocopy: true
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-secret}
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - target: 8025
+        published: ${MAILHOG_PUBLISHED_PORT:-8025}
+        protocol: tcp
+        mode: host
+
+  redis:
+    image: redis:5
