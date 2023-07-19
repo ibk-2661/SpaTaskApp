@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreTaskRequest;
-use App\Http\Requests\UpdateTaskRequest;
+use App\Http\Requests\TaskRequest;
 use App\Models\Task;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
@@ -15,7 +14,7 @@ class TaskController extends Controller
         return Task::orderByDesc('id')->get();
     }
 
-    public function store(StoreTaskRequest $request): JsonResponse
+    public function store(TaskRequest $request): JsonResponse
     {
         $task = Task::create($request->all());
 
@@ -32,7 +31,7 @@ class TaskController extends Controller
         //
     }
 
-    public function update(UpdateTaskRequest $request, Task $task): JsonResponse
+    public function update(TaskRequest $request, Task $task): JsonResponse
     {
         $task->title = $request->title;
 
