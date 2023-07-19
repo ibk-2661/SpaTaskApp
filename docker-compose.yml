@@ -19,6 +19,7 @@ services:
         target: /root/.config/psysh
         volume:
           nocopy: true
+    working_dir: /home/contents
 
   gateway:
     build:
